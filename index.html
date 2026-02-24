@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; }
         
-        /* 전체 화면 밝은 회색으로 */
+        /* 전체 화면 배경 */
         html, body { 
             margin: 0; padding: 0; width: 100%; height: 100%;
             background: #f4f4f4; 
@@ -16,46 +16,66 @@
             font-family: sans-serif; touch-action: none; 
         }
 
-        /* 원래 넓이(500px)로 복구하고 그림자 추가 */
+        /* 메인 앱 컨테이너 */
         #app-container { 
             width: 100%; max-width: 500px; margin: 0 auto; 
             display: flex; flex-direction: column; 
-            background: #fff; position: relative;
+            /* 영상을 돋보이게 하기 위해 내부 배경을 검은색으로 처리 */
+            background: #000; position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
-        /* 영상 컨테이너 배경 흰색으로 */
+        /* 영상 컨테이너 (버튼 박스를 감싸는 기준점) */
         .ad-container { 
-            flex: 1; position: relative; background: #ffffff; 
+            flex: 1; position: relative; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
         }
 
-        /* 💡 핵심 변경: contain을 cover로 변경하여 영상을 넓이에 꽉 차게 확대! */
-        .ad-vid { width: 100%; height: 100%; object-fit: cover; }
+        /* 💡 핵심 변경 1: 영상 비율 유지 (contain) */
+        .ad-vid { 
+            width: 100%; height: 100%; 
+            /* cover 대신 contain을 사용하여 어떤 기기에서든 영상이 잘리지 않고 전체가 보임 */
+            object-fit: contain; 
+        }
         
+        /* 좌측 상단 로고 */
         .top-logo { 
             position: absolute; top: 15px; left: 15px; color: #f1c40f; 
             font-weight: 900; font-size: 20px; z-index: 10; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none;
         }
 
+        /* 💡 핵심 변경 2: 화면 위 투명한 번호 박스 */
         .control-panel { 
-            background: #fff; border-top: 1px solid #eee; z-index: 20;
-            padding: 15px 10px 25px 10px; flex-shrink: 0;
+            position: absolute; 
+            bottom: 20px; /* 최대한 아래로 배치 (숫자 조절로 높낮이 변경 가능) */
+            left: 50%;
+            transform: translateX(-50%); /* 정확히 가운데 정렬 */
+            width: 92%; /* 양옆에 살짝 여백을 줌 */
+            /* 검은색 반투명 배경 (0.5는 50% 투명도) */
+            background: rgba(0, 0, 0, 0.5); 
+            border-radius: 15px; /* 박스 모서리를 부드럽게 */
+            padding: 12px 10px; 
+            z-index: 20; /* 영상보다 위에 오도록 설정 */
+            backdrop-filter: blur(5px); /* 배경을 살짝 흐리게 처리 (고급스러운 효과, 선택사항) */
         }
 
-        .button-grid { display: flex; justify-content: space-between; gap: 4px; }
+        .button-grid { display: flex; justify-content: space-between; gap: 6px; }
         
+        /* 버튼 기본 디자인 */
         .slot { 
             flex: 1; aspect-ratio: 1/1; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 11px; color: #ccc; background: #f9f9f9; border: 1px solid #eee; cursor: pointer;
+            font-weight: 700; font-size: 12px; color: #555; 
+            background: rgba(255, 255, 255, 0.85); /* 반투명 흰색 버튼 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer;
         }
 
         .active-btn { color: #fff !important; background: #4a90e2 !important; border: none !important; animation: pulse 1s infinite; }
-        .num-ball { background: #333; color: #fff; border: none; font-size: 13px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .save-btn { background: #27ae60 !important; font-size: 10px; }
+        .num-ball { background: #333; color: #fff; border: none; font-size: 14px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .save-btn { background: #27ae60 !important; font-size: 11px; }
         
-        #finalOverlay { display: none; position: absolute; top:0; left:0; right:0; bottom:0; background: #fff; z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        /* 최종 오버레이 창 */
+        #finalOverlay { display: none; position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(255,255,255,0.95); z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
         @keyframes pulse { 50% { opacity: 0.7; } }
         @keyframes pop { from { transform: scale(0.5); } to { transform: scale(1); } }
@@ -63,29 +83,34 @@
 </head>
 <body>
 <div id="app-container">
-    <div class="top-logo">EXLUX</div>
     <div class="ad-container">
+        <div class="top-logo">EXLUX</div>
+        
         <video id="v" class="ad-vid" playsinline loop muted preload="auto">
             <source src="ad.mp4" type="video/mp4">
         </video>
-    </div>
-    <div class="control-panel">
-        <div class="button-grid">
-            <div id="slot0" class="slot active-btn" onclick="startApp()">시작</div>
-            <div id="slot1" class="slot">?</div>
-            <div id="slot2" class="slot">?</div>
-            <div id="slot3" class="slot">?</div>
-            <div id="slot4" class="slot">?</div>
-            <div id="slot5" class="slot">?</div>
-            <div id="slot-save" class="slot">대기</div>
+
+        <div class="control-panel">
+            <div class="button-grid">
+                <div id="slot0" class="slot active-btn" onclick="startApp()">시작</div>
+                <div id="slot1" class="slot">?</div>
+                <div id="slot2" class="slot">?</div>
+                <div id="slot3" class="slot">?</div>
+                <div id="slot4" class="slot">?</div>
+                <div id="slot5" class="slot">?</div>
+                <div id="slot-save" class="slot">대기</div>
+            </div>
         </div>
     </div>
+
     <div id="finalOverlay">
         <h2 style="color:#27ae60">저장 완료</h2>
-        <button onclick="location.reload()" style="padding:10px 20px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer;">다시 시연</button>
+        <button onclick="location.reload()" style="padding:10px 20px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; font-weight:bold;">다시 시연</button>
     </div>
 </div>
+
 <script>
+    // 화면 높이 보정 (모바일 브라우저 UI 가림 방지)
     function setRealViewport() {
         document.getElementById('app-container').style.height = window.innerHeight + 'px';
     }
@@ -111,6 +136,7 @@
         v.play();
         run10SecTimer();
     }
+    
     function run10SecTimer() {
         setTimeout(() => {
             slots[step].innerText = (step === 0) ? "발급" : "다음";
@@ -118,11 +144,13 @@
             slots[step].onclick = (e) => { e.stopPropagation(); revealBall(); };
         }, 10000); 
     }
+    
     function revealBall() {
         slots[step].onclick = null;
         slots[step].innerText = nums[step];
         slots[step].className = "slot num-ball";
         step++;
+        
         if (step < 6) {
             slots[step].innerText = "...";
             run10SecTimer();
