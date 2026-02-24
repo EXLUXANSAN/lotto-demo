@@ -1,100 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EXLUX PRO DEMO</title>
     <style>
-        /* [환한 데모 환경] */
-        body { background-color: #f4f7f9; margin: 0; padding: 0; height: 100vh; font-family: 'Pretendard', sans-serif; overflow: hidden; display: flex; justify-content: center; }
-        .phone-container { width: 100%; max-width: 500px; height: 100%; position: relative; background: #fff; display: flex; flex-direction: column; }
+        /* [핵심] 브라우저 높이를 동적으로 계산할 변수 선언 */
+        :root { --vh: 100vh; }
+        html, body { 
+            /* 계산된 높이 변수를 적용 */
+            height: var(--vh); margin: 0; padding: 0; 
+            background: #000; overflow: hidden; font-family: sans-serif;
+        }
+        .phone-container { 
+            width: 100%; max-width: 500px; 
+            /* 컨테이너 높이도 계산된 값으로 설정 */
+            height: var(--vh);
+            margin: 0 auto; display: flex; flex-direction: column; background: #fff; position: relative;
+        }
+        .ad-container { flex: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        /* 영상이 잘리지 않고 화면에 꽉 차게 나옴 */
+        .ad-vid { width: 100%; height: 100%; object-fit: contain; }
         
-        /* [광고 영역] 자막을 가리지 않게 하단 패널 바로 위까지 확장 */
-        .ad-container { flex: 1; position: relative; background: #000; overflow: hidden; }
-        .ad-vid { width: 100%; height: 100%; object-fit: cover; }
-        
-        .top-logo { position: absolute; top: 20px; left: 20px; color: #f1c40f; font-weight: 900; font-size: 22px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        /* 상단 로고 위치를 안전 구역(safe-area)에 맞춰 조정 */
+        .top-logo { position: absolute; top: env(safe-area-inset-top, 20px); left: 20px; color: #f1c40f; font-weight: 900; font-size: 20px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-        /* [컨트롤 패널] 하단에 안정감 있게 안착된 디자인 */
         .control-panel { 
-            background: #ffffff; 
-            padding: 15px 8px 35px 8px; /* 좌우 여백 정밀 조정 */
-            border-top: 1px solid #e0e0e0;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
-            z-index: 20;
+            background: #fff; 
+            /* 하단 패널도 안전 구역을 고려해서 패딩 설정 */
+            padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 20px)) 10px;
+            border-top: 1px solid #eee; z-index: 20;
         }
-
-        /* [7버튼 레이아웃] 화면 폭에 맞게 균등 분배 */
-        .button-grid { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            width: 100%;
-            gap: 4px; /* 버튼 사이 간격 */
-        }
-
-        /* [공/버튼 디자인] 요청대로 크기와 폰트를 줄임 */
+        .button-grid { display: flex; justify-content: space-between; gap: 4px; }
         .slot { 
-            flex: 1; 
-            aspect-ratio: 1 / 1; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 700; 
-            font-size: 13px; /* 폰트 축소 */
-            color: #d1d1d1; 
-            background: #fafafa; 
-            border: 1px solid #eee;
-            transition: all 0.3s ease;
+            flex: 1; aspect-ratio: 1/1; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: 700; font-size: 11px; color: #ccc; background: #f9f9f9; border: 1px solid #eee;
         }
-        
-        /* 활성화 버튼 (시작, 발급, 다음, 저장) */
-        .active-btn { 
-            color: #fff !important; 
-            background: #4a90e2 !important; /* 세련된 블루 */
-            border: none !important;
-            box-shadow: 0 3px 8px rgba(74,144,226,0.3);
-            cursor: pointer;
-            animation: pulse 1.2s infinite;
-        }
+        .active-btn { color: #fff !important; background: #4a90e2 !important; border: none !important; animation: pulse 1s infinite; }
+        .num-ball { background: #333; color: #fff; border: none; font-size: 13px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .save-btn { background: #27ae60 !important; font-size: 10px; }
 
-        /* 저장 버튼 특화 */
-        .save-btn { 
-            background: #27ae60 !important; /* 저장 성공을 의미하는 녹색 */
-            box-shadow: 0 3px 8px rgba(39,174,96,0.3) !important;
-            color: white !important;
-            font-size: 11px; /* 글자가 많으므로 살짝 더 축소 */
-        }
-        
-        /* 발급된 번호 공: 프리미엄 실버/골드 느낌 */
-        .num-ball { 
-            background: linear-gradient(135deg, #636e72, #2d3436); 
-            color: #fff; 
-            font-size: 14px; 
-            border: none; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
-            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        /* 최종 완료 화면 */
-        #finalOverlay { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); z-index: 100; justify-content: center; align-items: center; text-align: center; }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #finalOverlay { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: #fff; z-index: 100; justify-content: center; align-items: center; text-align: center; }
+        @keyframes pulse { 50% { opacity: 0.7; } }
+        @keyframes pop { from { transform: scale(0.5); } to { transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div class="phone-container">
     <div class="top-logo">EXLUX</div>
-    
     <div class="ad-container">
-        <video id="v" class="ad-vid" playsinline loop>
+        <video id="v" class="ad-vid" playsinline loop muted preload="auto">
             <source src="ad.mp4" type="video/mp4">
         </video>
     </div>
-
     <div class="control-panel">
         <div class="button-grid">
             <div id="slot0" class="slot active-btn" onclick="startApp()">시작</div>
@@ -103,20 +62,26 @@
             <div id="slot3" class="slot">?</div>
             <div id="slot4" class="slot">?</div>
             <div id="slot5" class="slot">?</div>
-            <div id="slot-save" class="slot">대기</div> </div>
-    </div>
-
-    <div id="finalOverlay">
-        <div style="padding:40px 20px;">
-            <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
-            <h2 style="color:#27ae60; font-size: 24px;">저장 완료</h2>
-            <p style="color:#666; font-size: 14px;">지사장님, 모든 번호가<br>안전하게 서버에 등록되었습니다.</p>
-            <button onclick="location.reload()" style="margin-top:20px; padding: 12px 30px; border-radius: 8px; border:1px solid #ddd; background:#fff; color:#333; font-weight:bold;">다시 시연</button>
+            <div id="slot-save" class="slot">대기</div>
         </div>
+    </div>
+    <div id="finalOverlay">
+        <div><h2 style="color:#27ae60">저장 완료</h2><button onclick="location.reload()" style="padding:10px 20px; border-radius:10px; border:1px solid #ddd; background:#fff;">다시 시연</button></div>
     </div>
 </div>
 
 <script>
+    // [핵심] 모바일 브라우저의 주소창을 뺀 실제 높이를 계산하는 함수
+    function setVh() {
+        let vh = window.innerHeight + 'px';
+        document.documentElement.style.setProperty('--vh', vh);
+    }
+    // 화면 크기가 변하거나 가로/세로 모드가 바뀔 때마다 높이를 다시 계산
+    window.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', setVh);
+    // 페이지 로드 시 최초 실행
+    setVh();
+
     let step = 0;
     const v = document.getElementById('v');
     const slots = [
@@ -131,23 +96,16 @@
         slots[0].onclick = null;
         slots[0].innerText = "...";
         slots[0].classList.remove('active-btn');
-        
-        v.muted = false; 
-        v.play(); // 광고 무한 재생 시작
-        
+        v.muted = false;
+        v.play();
         run10SecTimer();
     }
 
     function run10SecTimer() {
-        // 10초 대기 (광고 몰입 시간)
         setTimeout(() => {
             slots[step].innerText = (step === 0) ? "발급" : "다음";
             slots[step].className = "slot active-btn";
-            
-            slots[step].onclick = (e) => {
-                e.stopPropagation();
-                revealBall();
-            };
+            slots[step].onclick = (e) => { e.stopPropagation(); revealBall(); };
         }, 10000); 
     }
 
@@ -155,21 +113,16 @@
         slots[step].onclick = null;
         slots[step].innerText = nums[step];
         slots[step].className = "slot num-ball";
-        
         step++;
-        
         if (step < 6) {
             slots[step].innerText = "...";
             run10SecTimer();
         } else {
-            // 모든 번호 발급 완료 후 저장 버튼 활성화
             setTimeout(() => {
                 saveBtn.innerText = "저장";
                 saveBtn.className = "slot active-btn save-btn";
-                saveBtn.onclick = () => {
-                    document.getElementById('finalOverlay').style.display = 'flex';
-                };
-            }, 1000); // 마지막 번호 나오고 1초 뒤에 저장 버튼 활성화
+                saveBtn.onclick = () => document.getElementById('finalOverlay').style.display = 'flex';
+            }, 1000);
         }
     }
 </script>
