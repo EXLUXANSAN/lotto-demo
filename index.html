@@ -6,41 +6,30 @@
     <title>EXLUX PRO DEMO</title>
     <style>
         * { box-sizing: border-box; }
-        
         html, body { 
-            margin: 0; padding: 0; 
+            margin: 0; padding: 0; width: 100%; height: 100%;
             background: #000; overflow: hidden; 
-            /* 화면 스크롤 원천 차단 */
-            position: fixed; top: 0; left: 0; width: 100%;
-            touch-action: none; 
+            position: fixed; top: 0; left: 0;
+            font-family: sans-serif; touch-action: none; 
         }
-
-        /* 자바스크립트가 높이를 통제할 메인 도화지 */
         #app-container { 
             width: 100%; max-width: 500px; margin: 0 auto; 
             display: flex; flex-direction: column; 
             background: #fff; position: relative;
         }
-
-        /* 상단 영상 영역 (남는 공간을 모두 흡수) */
         .ad-container { 
-            flex: 1; /* 핵심: 버튼 패널을 뺀 나머지 공간만 꽉 채움 */
-            position: relative; background: #000; 
+            flex: 1; position: relative; background: #000; 
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
         }
         .ad-vid { width: 100%; height: 100%; object-fit: contain; }
-        
         .top-logo { 
             position: absolute; top: 15px; left: 15px; color: #f1c40f; 
             font-weight: 900; font-size: 20px; z-index: 10; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none;
         }
-
-        /* 하단 컨트롤 패널 (절대 찌그러지지 않음) */
         .control-panel { 
             background: #fff; border-top: 1px solid #eee; z-index: 20;
-            padding: 15px 10px 25px 10px; /* 하단바 겹침 방지를 위해 아래 여백을 25px로 강화 */
-            flex-shrink: 0; /* 핵심: 화면이 좁아져도 이 영역은 절대 축소 금지 */
+            padding: 15px 10px 25px 10px; flex-shrink: 0;
         }
         .button-grid { display: flex; justify-content: space-between; gap: 4px; }
         .slot { 
@@ -50,14 +39,12 @@
         .active-btn { color: #fff !important; background: #4a90e2 !important; border: none !important; animation: pulse 1s infinite; }
         .num-ball { background: #333; color: #fff; border: none; font-size: 13px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .save-btn { background: #27ae60 !important; font-size: 10px; }
-
         #finalOverlay { display: none; position: absolute; top:0; left:0; right:0; bottom:0; background: #fff; z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         @keyframes pulse { 50% { opacity: 0.7; } }
         @keyframes pop { from { transform: scale(0.5); } to { transform: scale(1); } }
     </style>
 </head>
 <body>
-
 <div id="app-container">
     <div class="top-logo">EXLUX</div>
     <div class="ad-container">
@@ -81,18 +68,13 @@
         <button onclick="location.reload()" style="padding:10px 20px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer;">다시 시연</button>
     </div>
 </div>
-
 <script>
-    // 🚀 PRO 핵심 로직: 브라우저의 실제 가시 영역 픽셀을 측정하여 강제 적용
     function setRealViewport() {
-        const app = document.getElementById('app-container');
-        app.style.height = window.innerHeight + 'px';
+        document.getElementById('app-container').style.height = window.innerHeight + 'px';
     }
-    
-    // 화면 회전이나 카톡 메뉴바 등장/스마트폰 키보드 등장 시 즉각 반응
     window.addEventListener('resize', setRealViewport);
     window.addEventListener('orientationchange', setRealViewport);
-    setRealViewport(); // 초기 로드 시 실행
+    setRealViewport();
 
     let step = 0;
     const v = document.getElementById('v');
@@ -112,7 +94,6 @@
         v.play();
         run10SecTimer();
     }
-
     function run10SecTimer() {
         setTimeout(() => {
             slots[step].innerText = (step === 0) ? "발급" : "다음";
@@ -120,7 +101,6 @@
             slots[step].onclick = (e) => { e.stopPropagation(); revealBall(); };
         }, 10000); 
     }
-
     function revealBall() {
         slots[step].onclick = null;
         slots[step].innerText = nums[step];
