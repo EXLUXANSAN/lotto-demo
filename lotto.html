@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EXLUX PRO DEMO</title>
+    <style>
+        /* [환한 데모 환경] */
+        body { background-color: #f4f7f9; margin: 0; padding: 0; height: 100vh; font-family: 'Pretendard', sans-serif; overflow: hidden; display: flex; justify-content: center; }
+        .phone-container { width: 100%; max-width: 500px; height: 100%; position: relative; background: #fff; display: flex; flex-direction: column; }
+        
+        /* [광고 영역] 자막을 가리지 않게 하단 패널 바로 위까지 확장 */
+        .ad-container { flex: 1; position: relative; background: #000; overflow: hidden; }
+        .ad-vid { width: 100%; height: 100%; object-fit: cover; }
+        
+        .top-logo { position: absolute; top: 20px; left: 20px; color: #f1c40f; font-weight: 900; font-size: 22px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+        /* [컨트롤 패널] 하단에 안정감 있게 안착된 디자인 */
+        .control-panel { 
+            background: #ffffff; 
+            padding: 15px 8px 35px 8px; /* 좌우 여백 정밀 조정 */
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+            z-index: 20;
+        }
+
+        /* [7버튼 레이아웃] 화면 폭에 맞게 균등 분배 */
+        .button-grid { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            width: 100%;
+            gap: 4px; /* 버튼 사이 간격 */
+        }
+
+        /* [공/버튼 디자인] 요청대로 크기와 폰트를 줄임 */
+        .slot { 
+            flex: 1; 
+            aspect-ratio: 1 / 1; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 700; 
+            font-size: 13px; /* 폰트 축소 */
+            color: #d1d1d1; 
+            background: #fafafa; 
+            border: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        
+        /* 활성화 버튼 (시작, 발급, 다음, 저장) */
+        .active-btn { 
+            color: #fff !important; 
+            background: #4a90e2 !important; /* 세련된 블루 */
+            border: none !important;
+            box-shadow: 0 3px 8px rgba(74,144,226,0.3);
+            cursor: pointer;
+            animation: pulse 1.2s infinite;
+        }
+
+        /* 저장 버튼 특화 */
+        .save-btn { 
+            background: #27ae60 !important; /* 저장 성공을 의미하는 녹색 */
+            box-shadow: 0 3px 8px rgba(39,174,96,0.3) !important;
+            color: white !important;
+            font-size: 11px; /* 글자가 많으므로 살짝 더 축소 */
+        }
+        
+        /* 발급된 번호 공: 프리미엄 실버/골드 느낌 */
+        .num-ball { 
+            background: linear-gradient(135deg, #636e72, #2d3436); 
+            color: #fff; 
+            font-size: 14px; 
+            border: none; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
+        /* 최종 완료 화면 */
+        #finalOverlay { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.98); z-index: 100; justify-content: center; align-items: center; text-align: center; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="top-logo">EXLUX</div>
+    
+    <div class="ad-container">
+        <video id="v" class="ad-vid" playsinline loop>
+            <source src="ad.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="control-panel">
+        <div class="button-grid">
+            <div id="slot0" class="slot active-btn" onclick="startApp()">시작</div>
+            <div id="slot1" class="slot">?</div>
+            <div id="slot2" class="slot">?</div>
+            <div id="slot3" class="slot">?</div>
+            <div id="slot4" class="slot">?</div>
+            <div id="slot5" class="slot">?</div>
+            <div id="slot-save" class="slot">대기</div> </div>
+    </div>
+
+    <div id="finalOverlay">
+        <div style="padding:40px 20px;">
+            <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+            <h2 style="color:#27ae60; font-size: 24px;">저장 완료</h2>
+            <p style="color:#666; font-size: 14px;">지사장님, 모든 번호가<br>안전하게 서버에 등록되었습니다.</p>
+            <button onclick="location.reload()" style="margin-top:20px; padding: 12px 30px; border-radius: 8px; border:1px solid #ddd; background:#fff; color:#333; font-weight:bold;">다시 시연</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let step = 0;
+    const v = document.getElementById('v');
+    const slots = [
+        document.getElementById('slot0'), document.getElementById('slot1'),
+        document.getElementById('slot2'), document.getElementById('slot3'),
+        document.getElementById('slot4'), document.getElementById('slot5')
+    ];
+    const saveBtn = document.getElementById('slot-save');
+    const nums = [7, 14, 23, 32, 40, 43];
+
+    function startApp() {
+        slots[0].onclick = null;
+        slots[0].innerText = "...";
+        slots[0].classList.remove('active-btn');
+        
+        v.muted = false; 
+        v.play(); // 광고 무한 재생 시작
+        
+        run10SecTimer();
+    }
+
+    function run10SecTimer() {
+        // 10초 대기 (광고 몰입 시간)
+        setTimeout(() => {
+            slots[step].innerText = (step === 0) ? "발급" : "다음";
+            slots[step].className = "slot active-btn";
+            
+            slots[step].onclick = (e) => {
+                e.stopPropagation();
+                revealBall();
+            };
+        }, 10000); 
+    }
+
+    function revealBall() {
+        slots[step].onclick = null;
+        slots[step].innerText = nums[step];
+        slots[step].className = "slot num-ball";
+        
+        step++;
+        
+        if (step < 6) {
+            slots[step].innerText = "...";
+            run10SecTimer();
+        } else {
+            // 모든 번호 발급 완료 후 저장 버튼 활성화
+            setTimeout(() => {
+                saveBtn.innerText = "저장";
+                saveBtn.className = "slot active-btn save-btn";
+                saveBtn.onclick = () => {
+                    document.getElementById('finalOverlay').style.display = 'flex';
+                };
+            }, 1000); // 마지막 번호 나오고 1초 뒤에 저장 버튼 활성화
+        }
+    }
+</script>
+</body>
+</html>
