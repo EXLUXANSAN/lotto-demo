@@ -5,30 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EXLUX PRO DEMO</title>
     <style>
-        /* [핵심] 브라우저 높이를 동적으로 계산할 변수 선언 */
-        :root { --vh: 100vh; }
+        /* 🚀 핵심: 화면 스크롤과 잘림을 원천 차단하는 강력한 고정 방식 */
         html, body { 
-            /* 계산된 높이 변수를 적용 */
-            height: var(--vh); margin: 0; padding: 0; 
-            background: #000; overflow: hidden; font-family: sans-serif;
+            width: 100%; height: 100%; /* vh 대신 100% 사용 */
+            margin: 0; padding: 0; 
+            background: #000; 
+            overflow: hidden; 
+            position: fixed; /* 브라우저 창에 딱 물리게 고정 */
+            top: 0; left: 0;
+            font-family: sans-serif;
+            touch-action: none; /* 화면을 당겨서 새로고침 되는 현상 방지 */
         }
         .phone-container { 
             width: 100%; max-width: 500px; 
-            /* 컨테이너 높이도 계산된 값으로 설정 */
-            height: var(--vh);
+            height: 100%; /* 고정된 body 높이에 완벽히 맞춤 */
             margin: 0 auto; display: flex; flex-direction: column; background: #fff; position: relative;
         }
         .ad-container { flex: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        /* 영상이 잘리지 않고 화면에 꽉 차게 나옴 */
         .ad-vid { width: 100%; height: 100%; object-fit: contain; }
         
-        /* 상단 로고 위치를 안전 구역(safe-area)에 맞춰 조정 */
-        .top-logo { position: absolute; top: env(safe-area-inset-top, 20px); left: 20px; color: #f1c40f; font-weight: 900; font-size: 20px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        /* 상단 로고 위치를 여유 있게 고정 */
+        .top-logo { position: absolute; top: 15px; left: 15px; color: #f1c40f; font-weight: 900; font-size: 20px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         .control-panel { 
             background: #fff; 
-            /* 하단 패널도 안전 구역을 고려해서 패딩 설정 */
-            padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 20px)) 10px;
+            padding: 15px 10px 20px 10px; /* 하단 여백을 더 넉넉하게 확보 */
             border-top: 1px solid #eee; z-index: 20;
         }
         .button-grid { display: flex; justify-content: space-between; gap: 4px; }
@@ -71,17 +72,6 @@
 </div>
 
 <script>
-    // [핵심] 모바일 브라우저의 주소창을 뺀 실제 높이를 계산하는 함수
-    function setVh() {
-        let vh = window.innerHeight + 'px';
-        document.documentElement.style.setProperty('--vh', vh);
-    }
-    // 화면 크기가 변하거나 가로/세로 모드가 바뀔 때마다 높이를 다시 계산
-    window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', setVh);
-    // 페이지 로드 시 최초 실행
-    setVh();
-
     let step = 0;
     const v = document.getElementById('v');
     const slots = [
