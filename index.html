@@ -5,46 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EXLUX PRO DEMO</title>
     <style>
-        /* 🚀 3중 방어선: 브라우저 UI를 제외한 "진짜" 빈 공간만 계산 */
-        html, body { 
-            margin: 0; padding: 0; width: 100%; 
-            height: 100vh; /* 1차: 기본 높이 */
-            height: 100dvh; /* 2차: 카톡/사파리 동적 주소창 완벽 대응 (핵심) */
-            min-height: -webkit-fill-available; /* 3차: 아이폰 특효약 */
-            background: #000; overflow: hidden; font-family: sans-serif;
-            touch-action: none; /* 당겨서 새로고침 방지 */
-        }
-        
-        /* 높이를 숫자로 안 주고, 천장(top)과 바닥(bottom)에 강제로 못을 박아버림 */
-        .phone-container { 
-            position: absolute; 
-            top: 0; bottom: 0; left: 0; right: 0; 
-            max-width: 500px; margin: 0 auto; 
-            display: flex; flex-direction: column; background: #fff;
-        }
-        
-        .ad-container { flex: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .ad-vid { width: 100%; height: 100%; object-fit: contain; }
-        
-        .top-logo { position: absolute; top: 15px; left: 15px; color: #f1c40f; font-weight: 900; font-size: 20px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        /* 모든 요소의 여백 및 테두리 계산을 직관적으로 통일 */
+        * { box-sizing: border-box; }
 
-        .control-panel { 
-            background: #fff; 
-            /* 하단 패딩을 줄여서 버튼이 위로 살짝 올라오게 여유 확보 */
-            padding: 10px; 
-            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-            border-top: 1px solid #eee; z-index: 20;
+        /* 1단계: 화면 전체 스크롤 원천 차단 및 고정 */
+        html, body { 
+            width: 100%; height: 100%; 
+            margin: 0; padding: 0; 
+            background: #000; overflow: hidden; 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            font-family: sans-serif; touch-action: none;
         }
+
+        /* 2단계: 메인 컨테이너 영역 절대 고정 */
+        .phone-container { 
+            position: absolute; top: 0; bottom: 0; left: 0; right: 0; 
+            width: 100%; max-width: 500px; margin: 0 auto; 
+            background: #fff; overflow: hidden;
+        }
+        
+        /* 3단계: 상단 로고 절대 위치 부여 (안전 구역 확보) */
+        .top-logo { 
+            position: absolute; top: max(15px, env(safe-area-inset-top)); left: 15px; 
+            color: #f1c40f; font-weight: 900; font-size: 20px; z-index: 10; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none;
+        }
+
+        /* 4단계: 영상 영역을 상단부터 하단 패널 직전(bottom 85px)까지만 할당 */
+        .ad-container { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 85px; 
+            background: #000; display: flex; align-items: center; justify-content: center;
+        }
+        .ad-vid { width: 100%; height: 100%; object-fit: contain; }
+
+        /* 5단계: 컨트롤 패널을 화면 최하단에 절대 고정 */
+        .control-panel { 
+            position: absolute; bottom: 0; left: 0; right: 0; 
+            background: #fff; border-top: 1px solid #eee; z-index: 20;
+            /* 하단 안전구역(아이폰 홈바 등) 대응을 위한 동적 패딩 적용 */
+            padding: 10px 10px max(10px, env(safe-area-inset-bottom)) 10px;
+        }
+
         .button-grid { display: flex; justify-content: space-between; gap: 4px; }
         .slot { 
             flex: 1; aspect-ratio: 1/1; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 11px; color: #ccc; background: #f9f9f9; border: 1px solid #eee;
+            font-weight: 700; font-size: 11px; color: #ccc; background: #f9f9f9; border: 1px solid #eee; cursor: pointer;
         }
         .active-btn { color: #fff !important; background: #4a90e2 !important; border: none !important; animation: pulse 1s infinite; }
         .num-ball { background: #333; color: #fff; border: none; font-size: 13px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .save-btn { background: #27ae60 !important; font-size: 10px; }
 
-        #finalOverlay { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: #fff; z-index: 100; justify-content: center; align-items: center; text-align: center; }
+        #finalOverlay { display: none; position: absolute; top:0; left:0; right:0; bottom:0; background: #fff; z-index: 100; justify-content: center; align-items: center; text-align: center; }
+        
         @keyframes pulse { 50% { opacity: 0.7; } }
         @keyframes pop { from { transform: scale(0.5); } to { transform: scale(1); } }
     </style>
@@ -70,7 +82,10 @@
         </div>
     </div>
     <div id="finalOverlay">
-        <div><h2 style="color:#27ae60">저장 완료</h2><button onclick="location.reload()" style="padding:10px 20px; border-radius:10px; border:1px solid #ddd; background:#fff;">다시 시연</button></div>
+        <div>
+            <h2 style="color:#27ae60">저장 완료</h2>
+            <button onclick="location.reload()" style="padding:10px 20px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer;">다시 시연</button>
+        </div>
     </div>
 </div>
 
