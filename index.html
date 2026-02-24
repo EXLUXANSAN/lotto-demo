@@ -5,31 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EXLUX PRO DEMO</title>
     <style>
-        /* 🚀 핵심: 화면 스크롤과 잘림을 원천 차단하는 강력한 고정 방식 */
+        /* 🚀 3중 방어선: 브라우저 UI를 제외한 "진짜" 빈 공간만 계산 */
         html, body { 
-            width: 100%; height: 100%; /* vh 대신 100% 사용 */
-            margin: 0; padding: 0; 
-            background: #000; 
-            overflow: hidden; 
-            position: fixed; /* 브라우저 창에 딱 물리게 고정 */
-            top: 0; left: 0;
-            font-family: sans-serif;
-            touch-action: none; /* 화면을 당겨서 새로고침 되는 현상 방지 */
+            margin: 0; padding: 0; width: 100%; 
+            height: 100vh; /* 1차: 기본 높이 */
+            height: 100dvh; /* 2차: 카톡/사파리 동적 주소창 완벽 대응 (핵심) */
+            min-height: -webkit-fill-available; /* 3차: 아이폰 특효약 */
+            background: #000; overflow: hidden; font-family: sans-serif;
+            touch-action: none; /* 당겨서 새로고침 방지 */
         }
+        
+        /* 높이를 숫자로 안 주고, 천장(top)과 바닥(bottom)에 강제로 못을 박아버림 */
         .phone-container { 
-            width: 100%; max-width: 500px; 
-            height: 100%; /* 고정된 body 높이에 완벽히 맞춤 */
-            margin: 0 auto; display: flex; flex-direction: column; background: #fff; position: relative;
+            position: absolute; 
+            top: 0; bottom: 0; left: 0; right: 0; 
+            max-width: 500px; margin: 0 auto; 
+            display: flex; flex-direction: column; background: #fff;
         }
+        
         .ad-container { flex: 1; position: relative; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .ad-vid { width: 100%; height: 100%; object-fit: contain; }
         
-        /* 상단 로고 위치를 여유 있게 고정 */
         .top-logo { position: absolute; top: 15px; left: 15px; color: #f1c40f; font-weight: 900; font-size: 20px; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         .control-panel { 
             background: #fff; 
-            padding: 15px 10px 20px 10px; /* 하단 여백을 더 넉넉하게 확보 */
+            /* 하단 패딩을 줄여서 버튼이 위로 살짝 올라오게 여유 확보 */
+            padding: 10px; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
             border-top: 1px solid #eee; z-index: 20;
         }
         .button-grid { display: flex; justify-content: space-between; gap: 4px; }
