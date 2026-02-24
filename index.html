@@ -31,24 +31,19 @@
             display: flex; align-items: center; justify-content: center; overflow: hidden; 
         }
 
-        /* 💡 핵심 변경 1: 영상 비율 유지 (contain) */
+        /* 영상 비율 유지 (contain) */
         .ad-vid { 
             width: 100%; height: 100%; 
             /* cover 대신 contain을 사용하여 어떤 기기에서든 영상이 잘리지 않고 전체가 보임 */
             object-fit: contain; 
         }
         
-        /* 좌측 상단 로고 */
-        .top-logo { 
-            position: absolute; top: 15px; left: 15px; color: #f1c40f; 
-            font-weight: 900; font-size: 20px; z-index: 10; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none;
-        }
+        /* .top-logo 스타일 삭제됨 */
 
-        /* 💡 핵심 변경 2: 화면 위 투명한 번호 박스 */
+        /* 화면 위 투명한 번호 박스 */
         .control-panel { 
             position: absolute; 
-            bottom: 20px; /* 최대한 아래로 배치 (숫자 조절로 높낮이 변경 가능) */
+            bottom: 20px; /* 최대한 아래로 배치 */
             left: 50%;
             transform: translateX(-50%); /* 정확히 가운데 정렬 */
             width: 92%; /* 양옆에 살짝 여백을 줌 */
@@ -57,7 +52,7 @@
             border-radius: 15px; /* 박스 모서리를 부드럽게 */
             padding: 12px 10px; 
             z-index: 20; /* 영상보다 위에 오도록 설정 */
-            backdrop-filter: blur(5px); /* 배경을 살짝 흐리게 처리 (고급스러운 효과, 선택사항) */
+            backdrop-filter: blur(5px); /* 배경을 살짝 흐리게 처리 */
         }
 
         .button-grid { display: flex; justify-content: space-between; gap: 6px; }
@@ -84,8 +79,6 @@
 <body>
 <div id="app-container">
     <div class="ad-container">
-        <div class="top-logo">EXLUX</div>
-        
         <video id="v" class="ad-vid" playsinline loop muted preload="auto">
             <source src="ad.mp4" type="video/mp4">
         </video>
@@ -110,7 +103,7 @@
 </div>
 
 <script>
-    // 화면 높이 보정 (모바일 브라우저 UI 가림 방지)
+    // 화면 높이 보정
     function setRealViewport() {
         document.getElementById('app-container').style.height = window.innerHeight + 'px';
     }
